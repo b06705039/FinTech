@@ -39,31 +39,31 @@ def myStrategy(pastPriceVec, currentPrice, windowSize, alpha, beta,rsiL,rsiS):
 
 # Compute return rate over a given price vector, with 3 modifiable parameters
 def computeReturnRate(priceVec, windowSize, alpha, beta,rsiL,rsiS):
-	capital=1000	# Initial available capital
-	capitalOrig=capital	 # original capital
-	dataCount=len(priceVec)				# day size
-	suggestedAction=np.zeros((dataCount,1))	# Vec of suggested actions
-	stockHolding=np.zeros((dataCount,1))  	# Vec of stock holdings
-	total=np.zeros((dataCount,1))	 	# Vec of total asset
-	realAction=np.zeros((dataCount,1))	# Real action, which might be different from suggested action. For instance, when the suggested action is 1 (buy) but you don't have any capital, then the real action is 0 (hold, or do nothing). 
+	capital=1000												# Initial available capital
+	capitalOrig=capital	 									# original capital
+	dataCount=len(priceVec)							# day size
+	suggestedAction=np.zeros((dataCount,1))		# Vec of suggested actions
+	stockHolding=np.zeros((dataCount,1))  		# Vec of stock holdings
+	total=np.zeros((dataCount,1))	 					# Vec of total asset
+	realAction=np.zeros((dataCount,1))				# Real action, which might be different from suggested action. For instance, when the suggested action is 1 (buy) but you don't have any capital, then the real action is 0 (hold, or do nothing). 
 	# Run through each day
 	for ic in range(dataCount):
-		currentPrice=priceVec[ic]	# current price
+		currentPrice=priceVec[ic]						# current price
 		suggestedAction[ic]=myStrategy(priceVec[0:ic], currentPrice, windowSize, alpha, beta,rsiL,rsiS)		# Obtain the suggested action
 		# get real action by suggested action
 		if ic>0:
-			stockHolding[ic]=stockHolding[ic-1]	# The stock holding from the previous day
-		if suggestedAction[ic]==1:	# Suggested action is "buy"
-			if stockHolding[ic]==0:		# "buy" only if you don't have stock holding
+			stockHolding[ic]=stockHolding[ic-1]		# The stock holding from the previous day
+		if suggestedAction[ic]==1:						# Suggested action is "buy"
+			if stockHolding[ic]==0:						# "buy" only if you don't have stock holding
 				stockHolding[ic]=capital/currentPrice # Buy stock using cash
 				capital=0	# Cash
 				realAction[ic]=1
-		elif suggestedAction[ic]==-1:	# Suggested action is "sell"
-			if stockHolding[ic]>0:		# "sell" only if you have stock holding
+		elif suggestedAction[ic]==-1:					# Suggested action is "sell"
+			if stockHolding[ic]>0:							# "sell" only if you have stock holding
 				capital=stockHolding[ic]*currentPrice # Sell stock to have cash
-				stockHolding[ic]=0	# Stocking holding
+				stockHolding[ic]=0							# Stocking holding
 				realAction[ic]=-1
-		elif suggestedAction[ic]==0:	# No action
+		elif suggestedAction[ic]==0:						# No action
 			realAction[ic]=0
 		else:
 			assert False
@@ -72,11 +72,11 @@ def computeReturnRate(priceVec, windowSize, alpha, beta,rsiL,rsiS):
 	return returnRate
 
 if __name__=='__main__':
-	returnRateBest=-1.00	 # Initial best return rate
-	df=pd.read_csv(sys.argv[1])	# read stock file
-	adjClose=df["Adj Close"].values		# get adj close as the price vector
-	windowSizeMin=5; windowSizeMax=5;	# Range of windowSize to explore
-	alphaMin=0; alphaMax=0;			# Range of alpha to explore
+	returnRateBest=-1.00									 # Initial best return rate
+	df=pd.read_csv(sys.argv[1])							# read stock file
+	adjClose=df["Adj Close"].values					# get adj close as the price vector
+	windowSizeMin=5; windowSizeMax=5;			# Range of windowSize to explore
+	alphaMin=0; alphaMax=0;							# Range of alpha to explore
 	betaMin=1; betaMax=1;
 	rsiLMin=5; rsiLMax=30;
 	rsiSMin=10; rsiSMax=50;
@@ -84,11 +84,11 @@ if __name__=='__main__':
 	# Start exhaustive search
 	for windowSize in range(windowSizeMin, windowSizeMax+1):		# For-loop for windowSize
 		print("windowSize=%d" %(windowSize))
-		for alpha in range(alphaMin, alphaMax+1):	    	# For-loop for alpha
+		for alpha in range(alphaMin, alphaMax+1):	    # For-loop for alpha
 			print("\talpha=%d" %(alpha))
 			for beta in range(betaMin, betaMax+1):		# For-loop for beta
 				if beta>alpha:
-					print("\t\tbeta=%d" %(beta))	# No newline
+					print("\t\tbeta=%d" %(beta))			# No newline
 					for rsiL in range(rsiLMin, rsiLMax+1):
 						print("\trsiL=%d" %(rsiL), end="")
 						for rsiS in range(rsiSMin, rsiSMax+1):

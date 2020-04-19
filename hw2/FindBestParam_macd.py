@@ -24,52 +24,36 @@ def myStrategy(pastPriceVec, currentPrice,fp,sp,sigp):
 			elif macdL[len(macdL)-1]>signalL[len(signalL)-2] and macdL[len(macdL)-1]<0 and signalL[len(signalL)-2]<0:
 				action = -1
 
-	############## moving ave ####################
-	#dataLen=len(pastPriceVec)		# Length of the data vector
-	#if dataLen==0:
-	#	return action
-	# Compute ma
-	#if dataLen<windowSize:
-	#	ma=np.mean(pastPriceVec)	# If given price vector is small than windowSize, compute MA by taking the average
-	#else:
-	#	windowedData=pastPriceVec[-windowSize:]		# Compute the normal MA using windowSize
-	#	ma=np.mean(windowedData)
-	# Determine action
-	#if (currentPrice-ma)>alpha:		# If price-ma > alpha ==> buy
-	#	action=1
-	#elif (currentPrice-ma)<-beta:	# If price-ma < -beta ==> sell
-	#	action=-1
-
 	
 	return action
 
 # Compute return rate over a given price vector, with 3 modifiable parameters
 def computeReturnRate(priceVec, windowSize, alpha, beta,fp,sp,sigp):
-	capital=1000	# Initial available capital
-	capitalOrig=capital	 # original capital
-	dataCount=len(priceVec)				# day size
-	suggestedAction=np.zeros((dataCount,1))	# Vec of suggested actions
-	stockHolding=np.zeros((dataCount,1))  	# Vec of stock holdings
-	total=np.zeros((dataCount,1))	 	# Vec of total asset
-	realAction=np.zeros((dataCount,1))	# Real action, which might be different from suggested action. For instance, when the suggested action is 1 (buy) but you don't have any capital, then the real action is 0 (hold, or do nothing). 
+	capital=1000													# Initial available capital
+	capitalOrig=capital	 										# original capital
+	dataCount=len(priceVec)								# day size
+	suggestedAction=np.zeros((dataCount,1))			# Vec of suggested actions
+	stockHolding=np.zeros((dataCount,1))  			# Vec of stock holdings
+	total=np.zeros((dataCount,1))	 						# Vec of total asset
+	realAction=np.zeros((dataCount,1))					# Real action, which might be different from suggested action. For instance, when the suggested action is 1 (buy) but you don't have any capital, then the real action is 0 (hold, or do nothing). 
 	# Run through each day
 	for ic in range(dataCount):
-		currentPrice=priceVec[ic]	# current price
+		currentPrice=priceVec[ic]							# current price
 		suggestedAction[ic]=myStrategy(priceVec[0:ic], currentPrice, windowSize, alpha, beta,fp,sp,sigp)		# Obtain the suggested action
 		# get real action by suggested action
 		if ic>0:
-			stockHolding[ic]=stockHolding[ic-1]	# The stock holding from the previous day
-		if suggestedAction[ic]==1:	# Suggested action is "buy"
-			if stockHolding[ic]==0:		# "buy" only if you don't have stock holding
-				stockHolding[ic]=capital/currentPrice # Buy stock using cash
-				capital=0	# Cash
+			stockHolding[ic]=stockHolding[ic-1]			# The stock holding from the previous day
+		if suggestedAction[ic]==1:							# Suggested action is "buy"
+			if stockHolding[ic]==0:							# "buy" only if you don't have stock holding
+				stockHolding[ic]=capital/currentPrice 	# Buy stock using cash
+				capital=0											# Cash
 				realAction[ic]=1
-		elif suggestedAction[ic]==-1:	# Suggested action is "sell"
-			if stockHolding[ic]>0:		# "sell" only if you have stock holding
-				capital=stockHolding[ic]*currentPrice # Sell stock to have cash
-				stockHolding[ic]=0	# Stocking holding
+		elif suggestedAction[ic]==-1:						# Suggested action is "sell"
+			if stockHolding[ic]>0:								# "sell" only if you have stock holding
+				capital=stockHolding[ic]*currentPrice 	# Sell stock to have cash
+				stockHolding[ic]=0								# Stocking holding
 				realAction[ic]=-1
-		elif suggestedAction[ic]==0:	# No action
+		elif suggestedAction[ic]==0:							# No action
 			realAction[ic]=0
 		else:
 			assert False
@@ -78,25 +62,25 @@ def computeReturnRate(priceVec, windowSize, alpha, beta,fp,sp,sigp):
 	return returnRate
 
 if __name__=='__main__':
-	returnRateBest=-1.00	 # Initial best return rate
-	df=pd.read_csv(sys.argv[1])	# read stock file
-	adjClose=df["close"].values		# get adj close as the price vector
-	fpMin=12; fpMax=30;	# Range of windowSize to explore
-	spMin=26; spMax=40;			# Range of alpha to explore
-	sigpMin=9; sigpMax=20;				# Range of beta to explore
+	returnRateBest=-1.00	 									# Initial best return rate
+	df=pd.read_csv(sys.argv[1])								# read stock file
+	adjClose=df["close"].values								# get adj close as the price vector
+	fpMin=12; fpMax=30;										# Range of windowSize to explore
+	spMin=26; spMax=40;										# Range of alpha to explore
+	sigpMin=9; sigpMax=20;									# Range of beta to explore
 
 
 	# Start exhaustive search
-	for f in range(fpMin, fpMax+1):		# For-loop for windowSize
+	for f in range(fpMin, fpMax+1):							# For-loop for windowSize
 		print("fastperiod=%d" %(f))
-		for s in range(spMin, spMax+1):	    	# For-loop for alpha
+		for s in range(spMin, spMax+1):	    			# For-loop for alpha
 			print("\tslowperiod=%d" %(s))
-			for sig in range(sigpMin, sigpMax+1):		# For-loop for beta
+			for sig in range(sigpMin, sigpMax+1):			# For-loop for beta
 				print("\t\tsignalperiod=%d" %(sig), end="")	# No newline
 				if(sig<f and f<s):
 					returnRate=computeReturnRate(adjClose,f,s,sig)		# Start the whole run with the given parameters
 					print(" ==> returnRate=%f " %(returnRate))
-					if returnRate > returnRateBest:		# Keep the best parameters
+					if returnRate > returnRateBest:			# Keep the best parameters
 						fastPeriodBest=f
 						slowPeriodBest=s
 						signalPeriodBest=sig
