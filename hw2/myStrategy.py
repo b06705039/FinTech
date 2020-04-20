@@ -18,10 +18,6 @@ def myStrategy(pastData, currPrice, stockType):
 	rsiS=paramSetting[stockType]['rsiS']
 
 
-	############## ATR #####################
-
-	talib2df(abstract.ATR(tsmc)).plot()
-	tsmc['close'].plot(secondary_y=True)
 
 	
 	############## RSI #####################
