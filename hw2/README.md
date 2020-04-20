@@ -9,5 +9,21 @@ Design trading strategies such that the total return of 4 stocks over a given pe
 * LQD: iShares iBoxx $ Investment Grade Corporate Bond ETF (LQD)
 * DSI: iShares MSCI KLD 400 Social ETF (DSI)
 
+# Requirements
+* python
+* numpy
+* pandas
+
+# Process
+1. Find the best parameter of different use "FindBestParam_<strategy name>.py"
+2. Combine method & param implemented in "myStrategy.py"
+3. "profitEstimate.py" will execute the function written in "myStrategy.py"
+
+# Execution
+```
+python profitEstimate.py <stockName.csv>
+```
+
+
 
 
